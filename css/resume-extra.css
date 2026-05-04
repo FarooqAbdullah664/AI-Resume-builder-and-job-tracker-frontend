@@ -1,0 +1,265 @@
+/* ══════════════════════════════════════════════
+   RESUME PAGE — EXTRA STYLES
+   PDF Upload + Download Styles
+   ══════════════════════════════════════════════ */
+
+/* ── INPUT TABS (Text / PDF) ─────────────────── */
+.input-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 5px;
+}
+
+.input-tab {
+  flex: 1;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text3);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: var(--trans);
+}
+
+.input-tab:hover {
+  color: var(--text);
+  background: var(--surface3);
+}
+
+.input-tab.active {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108,99,255,0.35);
+}
+
+/* ── PDF DROP ZONE ───────────────────────────── */
+.pdf-drop-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--trans);
+  background: var(--surface2);
+  margin-bottom: 16px;
+}
+
+.pdf-drop-zone:hover,
+.pdf-drop-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.06);
+}
+
+.pdf-drop-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.pdf-drop-title {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.pdf-drop-sub {
+  font-size: 13px;
+  color: var(--text3);
+}
+
+/* ── PDF STATUS ──────────────────────────────── */
+.pdf-status {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.pdf-status-loading {
+  background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.25);
+  color: var(--accent3);
+}
+
+.pdf-status-success {
+  background: rgba(52,211,153,0.1);
+  border: 1px solid rgba(52,211,153,0.25);
+  color: var(--success);
+}
+
+.pdf-status-error {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.25);
+  color: var(--danger);
+}
+
+/* ── PDF PREVIEW ─────────────────────────────── */
+.pdf-preview {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.pdf-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.pdf-preview-text {
+  padding: 16px;
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.7;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* ── DOWNLOAD SECTION ────────────────────────── */
+.download-section {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-top: 20px;
+}
+
+.download-section h4 {
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.download-styles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+/* ── DOWNLOAD BUTTONS ────────────────────────── */
+.dl-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 8px;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius);
+  background: var(--surface3);
+  cursor: pointer;
+  transition: var(--trans-spring);
+  font-family: var(--font);
+  text-align: center;
+}
+
+.dl-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.dl-icon {
+  font-size: 24px;
+  display: block;
+}
+
+.dl-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  display: block;
+}
+
+.dl-desc {
+  font-size: 11px;
+  color: var(--text3);
+  display: block;
+}
+
+/* Individual button accent colors */
+.dl-classic {
+  border-color: rgba(148,163,184,0.3);
+}
+.dl-classic:hover {
+  border-color: #94a3b8;
+  background: rgba(148,163,184,0.08);
+}
+.dl-classic .dl-name { color: #94a3b8; }
+
+.dl-modern {
+  border-color: rgba(37,99,235,0.35);
+}
+.dl-modern:hover {
+  border-color: #2563eb;
+  background: rgba(37,99,235,0.08);
+  box-shadow: 0 8px 24px rgba(37,99,235,0.2);
+}
+.dl-modern .dl-name { color: #60a5fa; }
+
+.dl-minimal {
+  border-color: rgba(255,255,255,0.12);
+}
+.dl-minimal:hover {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.05);
+}
+.dl-minimal .dl-name { color: var(--text); }
+
+.dl-executive {
+  border-color: rgba(180,140,60,0.35);
+}
+.dl-executive:hover {
+  border-color: #b48c3c;
+  background: rgba(180,140,60,0.08);
+  box-shadow: 0 8px 24px rgba(180,140,60,0.2);
+}
+.dl-executive .dl-name { color: #f59e0b; }
+
+.dl-creative {
+  border-color: rgba(108,99,255,0.35);
+}
+.dl-creative:hover {
+  border-color: var(--accent);
+  background: rgba(108,99,255,0.08);
+  box-shadow: 0 8px 24px rgba(108,99,255,0.25);
+}
+.dl-creative .dl-name { color: var(--accent2); }
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media (max-width: 900px) {
+  .download-styles { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .download-styles { grid-template-columns: repeat(2, 1fr); }
+  .content-grid    { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .download-section { padding: 14px; }
+  .download-styles  { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .pdf-drop-zone    { padding: 24px 12px; }
+  .input-tabs       { gap: 4px; }
+  .pdf-preview-text { font-size: 11px; }
+}

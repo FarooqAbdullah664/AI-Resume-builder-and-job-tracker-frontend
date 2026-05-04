@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Tracker — ResumeAI</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="dashboard.html" class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 26 26" fill="none">
+          <path d="M6 13L11 18L20 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-brand-name">ResumeAI</span>
+    </a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="resume.html" class="nav-link">Resume Analyzer</a>
+      <a href="Jobs.html" class="nav-link active">Job Tracker</a>
+    </div>
+    <div class="nav-end">
+      <div class="nav-user-chip">
+        <div class="nav-avatar" id="userInitial">U</div>
+        <span id="userName">User</span>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-header-glow"></div>
+      <div>
+        <div class="page-title">🗂️ Job Application Tracker</div>
+        <div class="page-subtitle">Manage all your applications in one place</div>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn-primary btn-sm" id="addJobBtn" style="width:auto;">+ Add New Job</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card c-blue">
+      <div class="stat-card-top">
+        <div class="stat-icon">📨</div>
+        <div class="stat-info">
+          <div class="stat-value" id="appliedCount">0</div>
+          <div class="stat-label">Applied</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card c-yellow">
+      <div class="stat-card-top">
+        <div class="stat-icon">🤝</div>
+        <div class="stat-info">
+          <div class="stat-value" id="interviewingCount">0</div>
+          <div class="stat-label">Interviewing</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-card-top">
+        <div class="stat-icon">🎉</div>
+        <div class="stat-info">
+          <div class="stat-value" id="offeredCount">0</div>
+          <div class="stat-label">Offered</div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card" style="border-top:2px solid var(--danger);">
+      <div class="stat-card-top">
+        <div class="stat-icon" style="background:rgba(248,113,113,0.12);">❌</div>
+        <div class="stat-info">
+          <div class="stat-value" id="rejectedCount">0</div>
+          <div class="stat-label">Rejected</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">All Applications</div>
+      <select id="statusFilter" class="filter-select">
+        <option value="all">All Status</option>
+        <option value="Applied">Applied</option>
+        <option value="Interviewing">Interviewing</option>
+        <option value="Offered">Offered</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-container">
+        <table class="jobs-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Position</th>
+              <th>Status</th>
+              <th>Date Applied</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jobsTableBody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state" style="padding:56px 20px;">
+                  <div class="empty-state-icon">💼</div>
+                  No job applications yet
+                  <br/>
+                  <button class="btn-secondary btn-sm" style="margin-top:16px; width:auto;"
+                    onclick="document.getElementById('addJobBtn').click()">
+                    Add Your First Job
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-container -->
+
+<!-- Modal -->
+<div id="jobModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Add New Job</h3>
+      <button class="modal-close" id="closeModal">✕</button>
+    </div>
+    <form id="jobForm" onsubmit="return false;">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="company">Company Name *</label>
+          <input type="text" id="company" placeholder="e.g., Google" required/>
+        </div>
+        <div class="form-group">
+          <label for="position">Position *</label>
+          <input type="text" id="position" placeholder="e.g., Senior Software Engineer" required/>
+        </div>
+        <div class="form-group">
+          <label for="jobDescription">Job Description</label>
+          <textarea id="jobDescription" rows="4" placeholder="Paste job description or notes…"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="status">Status *</label>
+          <select id="status" required>
+            <option value="Applied">Applied</option>
+            <option value="Interviewing">Interviewing</option>
+            <option value="Offered">Offered</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="notes">Additional Notes</label>
+          <textarea id="notes" rows="3" placeholder="Recruiter contact, salary range, next steps…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" id="cancelBtn">Cancel</button>
+        <button type="submit" class="btn-primary btn-sm" id="saveJobBtn" style="width:auto;">
+          <span id="saveBtnText">Save Job</span>
+          <span id="saveBtnLoader" class="loader" style="display:none;"></span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/jobs.js"></script>
+</body>
+</html>

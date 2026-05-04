@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — ResumeAI</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="dashboard.html" class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 26 26" fill="none">
+          <path d="M6 13L11 18L20 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-brand-name">ResumeAI</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="resume.html" class="nav-link">Resume Analyzer</a>
+      <a href="Jobs.html" class="nav-link">Job Tracker</a>
+    </div>
+
+    <div class="nav-end">
+      <div class="nav-user-chip">
+        <div class="nav-avatar" id="userInitial">U</div>
+        <span id="userName">Loading…</span>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main-container">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-header-glow"></div>
+      <div>
+        <div class="page-title">Your Career Hub</div>
+        <div class="page-subtitle">Track progress, analyze resumes, and manage applications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card c-purple">
+      <div class="stat-card-top">
+        <div class="stat-icon">📄</div>
+        <div class="stat-info">
+          <div class="stat-value" id="resumeCount">0</div>
+          <div class="stat-label">Resumes Analyzed</div>
+        </div>
+      </div>
+      <div class="stat-change flat">— All time</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-card-top">
+        <div class="stat-icon">💼</div>
+        <div class="stat-info">
+          <div class="stat-value" id="jobCount">0</div>
+          <div class="stat-label">Applications Tracked</div>
+        </div>
+      </div>
+      <div class="stat-change flat">— Total</div>
+    </div>
+    <div class="stat-card c-green">
+      <div class="stat-card-top">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-info">
+          <div class="stat-value" id="interviewCount">0</div>
+          <div class="stat-label">Interviews</div>
+        </div>
+      </div>
+      <div class="stat-change up">↑ Active</div>
+    </div>
+    <div class="stat-card c-yellow">
+      <div class="stat-card-top">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-info">
+          <div class="stat-value" id="avgScore">—</div>
+          <div class="stat-label">Avg Resume Score</div>
+        </div>
+      </div>
+      <div class="stat-change flat">— Last analysis</div>
+    </div>
+  </div>
+
+  <!-- Action cards -->
+  <div class="action-cards">
+    <a href="resume.html" class="action-card ac-purple">
+      <div class="action-card-icon">📊</div>
+      <div class="action-card-content">
+        <div class="action-card-title">Resume Analyzer</div>
+        <div class="action-card-desc">AI-powered insights, ATS scoring, and personalized improvement suggestions.</div>
+        <span class="action-card-badge" id="resumeBadge">0 resumes analyzed</span>
+      </div>
+    </a>
+    <a href="Jobs.html" class="action-card ac-blue">
+      <div class="action-card-icon">🗂️</div>
+      <div class="action-card-content">
+        <div class="action-card-title">Job Tracker</div>
+        <div class="action-card-desc">Track applications, interview stages, and follow-up status in one place.</div>
+        <span class="action-card-badge" id="jobBadge">0 applications</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Bottom grid -->
+  <div class="content-grid">
+
+    <!-- Recent Resume Activity -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Latest Resume Analysis</div>
+          <div class="card-subtitle">Your most recent AI resume results</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="recentResumes" class="activity-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">📄</div>
+            No resume analyzed yet
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Job Applications -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Recent Job Applications</div>
+          <div class="card-subtitle">Applications you've added</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="recentJobs" class="activity-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">💼</div>
+            No job applications yet
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /main-container -->
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

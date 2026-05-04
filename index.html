@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ResumeAI — Sign In</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Left branding panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-logo">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+          <path d="M6 13L11 18L20 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">ResumeAI</span>
+    </div>
+
+    <div class="auth-headline">
+      <h1>Land your<br/><span>dream job</span><br/>faster.</h1>
+    </div>
+
+    <p class="auth-sub">
+      AI-powered resume analysis, ATS optimization, and job tracking — all in one clean dashboard.
+    </p>
+
+    <div class="auth-features">
+      <div class="feat-item">
+        <div class="feat-icon">✨</div>
+        <span class="feat-text">AI resume scoring & improvement</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">📊</div>
+        <span class="feat-text">ATS compatibility analysis</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">🎯</div>
+        <span class="feat-text">Job application tracker</span>
+      </div>
+      <div class="feat-item">
+        <div class="feat-icon">⚡</div>
+        <span class="feat-text">Resume-to-job matcher</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right auth panel -->
+  <div class="auth-right">
+    <div class="auth-box">
+      <h2 class="auth-box-title" id="formTitle">Welcome back</h2>
+      <p class="auth-box-sub" id="formSubtitle">Sign in to continue to your account</p>
+
+      <form id="authForm" onsubmit="return false;">
+        <div class="form-group" id="nameGroup" style="display:none;">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="Your full name"/>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" required/>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Your password" required/>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <button type="submit" class="btn-primary btn-lg" id="submitBtn">
+          <span id="btnText">Sign In</span>
+          <span id="btnLoader" class="loader" style="display:none;"></span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p id="toggleText">
+          Don't have an account? <a href="#" id="toggleLink">Create one</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/auth.js"></script>
+</body>
+</html>

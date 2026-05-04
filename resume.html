@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resume Analyzer — ResumeAI</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/resume-extra.css"/>
+  <link rel="stylesheet" href="css/animations.css"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="dashboard.html" class="nav-brand">
+      <div class="nav-logo">
+        <svg width="20" height="20" viewBox="0 0 26 26" fill="none">
+          <path d="M6 13L11 18L20 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="nav-brand-name">ResumeAI</span>
+    </a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="resume.html" class="nav-link active">Resume Analyzer</a>
+      <a href="Jobs.html" class="nav-link">Job Tracker</a>
+    </div>
+    <div class="nav-end">
+      <div class="nav-user-chip">
+        <div class="nav-avatar" id="userInitial">U</div>
+        <span id="userName">User</span>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main-container">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-header-glow"></div>
+      <div>
+        <div class="page-title">📄 AI Resume Analyzer</div>
+        <div class="page-subtitle">Get instant AI feedback, ATS scores, and improvement suggestions</div>
+      </div>
+      <div class="page-header-actions">
+        <div style="display:flex; gap:24px; align-items:center;">
+          <div style="text-align:center;">
+            <div style="font-family:var(--font-head); font-size:26px; font-weight:700; color:var(--accent2);" id="totalAnalyses">0</div>
+            <div style="font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px;">Analyses</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-family:var(--font-head); font-size:26px; font-weight:700; color:var(--success);" id="avgScore">—</div>
+            <div style="font-size:12px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px;">Avg Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main grid -->
+  <div class="content-grid">
+
+    <!-- Upload section -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Add Your Resume</div>
+            <div class="card-subtitle">Paste text or upload a PDF file</div>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <!-- Input mode tabs -->
+          <div class="input-tabs">
+            <button class="input-tab active" id="tabText" onclick="switchTab('text')">✏️ Paste Text</button>
+            <button class="input-tab" id="tabPdf" onclick="switchTab('pdf')">📎 Upload PDF</button>
+          </div>
+
+          <form id="resumeForm" onsubmit="return false;">
+
+            <!-- Text input panel -->
+            <div id="panelText">
+              <div class="form-group">
+                <label for="resumeText">Resume Content</label>
+                <textarea id="resumeText" rows="14"
+                  placeholder="Paste your resume here...
+
+Example:
+John Doe — Software Engineer
+john@email.com | LinkedIn | GitHub
+
+EXPERIENCE
+Senior Developer at TechCorp (2021–Present)
+• Led team of 5 engineers building scalable APIs
+• Reduced load time by 40% via caching strategies
+
+SKILLS
+JavaScript, Python, React, Node.js, AWS..."></textarea>
+              </div>
+            </div>
+
+            <!-- PDF upload panel -->
+            <div id="panelPdf" style="display:none;">
+              <div class="pdf-drop-zone" id="pdfDropZone" onclick="document.getElementById('pdfFileInput').click()">
+                <div class="pdf-drop-icon">📄</div>
+                <div class="pdf-drop-title">Drop your PDF here</div>
+                <div class="pdf-drop-sub">or click to browse — PDF files only</div>
+                <input type="file" id="pdfFileInput" accept=".pdf" style="display:none;" onchange="handlePdfUpload(event)"/>
+              </div>
+              <div id="pdfStatus" class="pdf-status" style="display:none;"></div>
+              <div id="pdfPreview" class="pdf-preview" style="display:none;">
+                <div class="pdf-preview-header">
+                  <span>📋 Extracted Text Preview</span>
+                  <button type="button" class="btn-secondary btn-sm" onclick="clearPdf()">✕ Clear</button>
+                </div>
+                <div id="pdfPreviewText" class="pdf-preview-text"></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary btn-lg" id="analyzeBtn">
+              <span id="analyzeBtnText">⚡ Analyze Resume</span>
+              <span id="analyzeBtnLoader" class="loader" style="display:none;"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results section -->
+    <div id="resultsSection" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📊 Analysis Results</div>
+        </div>
+        <div class="card-body">
+
+          <div class="score-cards">
+            <div class="score-card">
+              <div class="score-label">Resume Score</div>
+              <div class="score-value" id="resumeScore">—</div>
+              <div class="score-bar"><div class="score-fill" id="resumeScoreFill" style="width:0%"></div></div>
+            </div>
+            <div class="score-card">
+              <div class="score-label">ATS Score</div>
+              <div class="score-value" id="atsScore">—</div>
+              <div class="score-bar"><div class="score-fill" id="atsScoreFill" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <div class="suggestions-box">
+            <h4>💡 Improvement Suggestions</h4>
+            <ul id="suggestionsList"></ul>
+          </div>
+
+          <div class="improved-text-box">
+            <h4>✨ AI-Improved Version</h4>
+            <div class="improved-content" id="improvedContent"></div>
+          </div>
+
+          <!-- Download Section -->
+          <div class="download-section">
+            <h4>⬇️ Download Resume — Choose a Style</h4>
+            <div class="download-styles">
+              <button class="dl-btn dl-classic"   onclick="downloadResume('classic')">
+                <span class="dl-icon">🗂️</span>
+                <span class="dl-name">Classic</span>
+                <span class="dl-desc">Clean & traditional</span>
+              </button>
+              <button class="dl-btn dl-modern"    onclick="downloadResume('modern')">
+                <span class="dl-icon">🎨</span>
+                <span class="dl-name">Modern</span>
+                <span class="dl-desc">Bold & colorful</span>
+              </button>
+              <button class="dl-btn dl-minimal"   onclick="downloadResume('minimal')">
+                <span class="dl-icon">⬜</span>
+                <span class="dl-name">Minimal</span>
+                <span class="dl-desc">Simple & elegant</span>
+              </button>
+              <button class="dl-btn dl-executive" onclick="downloadResume('executive')">
+                <span class="dl-icon">💼</span>
+                <span class="dl-name">Executive</span>
+                <span class="dl-desc">Dark & premium</span>
+              </button>
+              <button class="dl-btn dl-creative"  onclick="downloadResume('creative')">
+                <span class="dl-icon">✨</span>
+                <span class="dl-name">Creative</span>
+                <span class="dl-desc">Gradient & vibrant</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-grid -->
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📈 Analysis History</div>
+      <button class="btn-secondary btn-sm" id="refreshHistoryBtn">↻ Refresh</button>
+    </div>
+    <div class="card-body">
+      <div id="historyList" class="history-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">📈</div>
+          No analyses yet — submit your first resume above
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-container -->
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/resume.js"></script>
+</body>
+</html>
