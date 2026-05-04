@@ -14,10 +14,31 @@ const btnLoader    = document.getElementById('btnLoader');
 const errorMessage = document.getElementById('errorMessage');
 const successMessage = document.getElementById('successMessage');
 
-// Agar pehle se login hai to redirect karo
-if (localStorage.getItem('token')) {
-  window.location.href = 'dashboard.html';
+// ✅ FIX: Token validate karo — sirf valid token pe redirect karo
+async function checkExistingToken() {
+  const token = localStorage.getItem('token');
+  if (!token) return; // No token — stay on login page
+
+  try {
+    // Token verify karo backend se
+    const res = await fetch(`${API_URL}/auth/verify`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      window.location.href = 'dashboard.html';
+    } else {
+      // Token invalid/expired — clear karo
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+    }
+  } catch (err) {
+    // Network error — token check skip karo, login page pe raho
+    // Agar token hai toh dashboard pe jaane do
+    window.location.href = 'dashboard.html';
+  }
 }
+
+checkExistingToken();
 
 // Login / Register toggle
 document.getElementById('toggleText').addEventListener('click', (e) => {

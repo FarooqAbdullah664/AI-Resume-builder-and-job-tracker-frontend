@@ -465,7 +465,8 @@ body                                          { animation: fadeIn .3s ease both;
 
   /* Nav */
   .nav-brand-name { font-size:14px; }
-  .btn-logout     { display:none; }
+  /* btn-logout mobile pe visible rakho — sirf text chhota karo */
+  .btn-logout { font-size:11px; padding:5px 10px; }
 
   /* Modal full screen */
   .modal         { padding:0; align-items:flex-end; }
