@@ -9,7 +9,7 @@ const API_BASE_URL = (() => {
 
   // 🔧 Step: Backend Vercel pe deploy karo, woh URL yahan daalo
   // Example: 'https://resumeai-backend.vercel.app/api'
-  const PRODUCTION_URL = 'https://ai-resume-builder-and-job-tracker-b.vercel.app/';
+  const PRODUCTION_URL = 'https://ai-resume-builder-and-job-tracker-b.vercel.app/api';
 
   return isLocal ? 'http://localhost:5000/api' : PRODUCTION_URL;
 })();
