@@ -389,6 +389,57 @@ function certsBlock(doc, certs, x, y, maxW, rgb) {
   return y + 2;
 }
 
+// ── RAW TEXT RENDERER ─────────────────────────
+// Jab structured parse fail ho — aiImprovedText ko
+// directly PDF mein render karo with smart formatting
+function renderRawText(doc, rawText, x, y, maxW, headRGB, bodyRGB) {
+  const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|EXPERIENCE|WORK|EDUCATION|SKILLS|CERTIF|PROJECTS?|LANGUAGES?|AWARDS?|CONTACT|REFERENCES?)/i;
+  const lines = rawText.split('\n');
+
+  lines.forEach(line => {
+    if (y > PH - 18) { doc.addPage(); y = 18; }
+    const trimmed = line.trim();
+    if (!trimmed) { y += 3; return; }
+
+    if (SECTION_RE.test(trimmed) && trimmed.length < 50) {
+      // Section heading
+      y += 3;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...headRGB);
+      doc.text(trimmed.toUpperCase(), x, y);
+      doc.setDrawColor(...headRGB);
+      doc.setLineWidth(0.4);
+      doc.line(x, y + 1.5, x + maxW, y + 1.5);
+      y += 8;
+    } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+      // Bullet point
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(...bodyRGB);
+      const bullet = '\u2022  ' + trimmed.replace(/^[•\-*]\s*/, '');
+      y = txt(doc, bullet, x + 3, y, maxW - 3, 5);
+      y += 1;
+    } else if (trimmed.length < 60 && !trimmed.includes('@') && !trimmed.match(/^\d/) &&
+               trimmed === trimmed.toUpperCase() && trimmed.length > 3) {
+      // ALL CAPS short line = likely a name or heading
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...headRGB);
+      y = txt(doc, trimmed, x, y, maxW, 6);
+      y += 2;
+    } else {
+      // Normal text
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(...bodyRGB);
+      y = txt(doc, trimmed, x, y, maxW, 5.5);
+      y += 1;
+    }
+  });
+  return y;
+}
+
 // ══════════════════════════════════════════════
 //  STYLE 1 — CLASSIC
 // ══════════════════════════════════════════════
@@ -408,6 +459,12 @@ function buildClassic(doc, cv) {
   y = contactRow(doc, cv.contact || {}, M, y, TW, LGT);
   y += 4;
   doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.line(M, y, PW-M, y); y += 6;
+
+  // ── Raw text fallback ──
+  if (cv._rawText) {
+    y = renderRawText(doc, cv._rawText, M, y, TW, BLK, GRY);
+    return;
+  }
 
   if (cv.summary) {
     y = secHead(doc, 'Professional Summary', M, y, TW, BLK, BLK);
@@ -482,6 +539,10 @@ function buildModern(doc, cv) {
 
   // Main content
   let y = 18;
+  if (cv._rawText) {
+    y = renderRawText(doc, cv._rawText, MX, y, TW, BLUE, GRY);
+    return;
+  }
   if (cv.summary) {
     y = secHead(doc, 'Summary', MX, y, TW, BLUE, BLUE);
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...GRY);
@@ -533,6 +594,11 @@ function buildMinimal(doc, cv) {
   }
   y += 4;
   doc.setDrawColor(200,200,200); doc.setLineWidth(0.3); doc.line(M, y, PW-M, y); y += 7;
+
+  if (cv._rawText) {
+    y = renderRawText(doc, cv._rawText, M, y, TW, BLK, MID);
+    return;
+  }
 
   if (cv.summary) {
     doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(...LGT);
@@ -591,6 +657,11 @@ function buildExecutive(doc, cv) {
   }
   doc.setDrawColor(...GOLD); doc.setLineWidth(0.6); doc.line(M, y, PW-M, y); y += 7;
 
+  if (cv._rawText) {
+    y = renderRawText(doc, cv._rawText, M, y, TW, GOLD, SILVER);
+    return;
+  }
+
   if (cv.summary) {
     y = secHead(doc, 'Executive Summary', M, y, TW, GOLD, GOLD);
     doc.setFont('helvetica','normal'); doc.setFontSize(9.5); doc.setTextColor(...SILVER);
@@ -646,6 +717,11 @@ function buildCreative(doc, cv) {
     doc.text([c.linkedin, c.github].filter(Boolean).join('   |   '), M, y); y += 5;
   }
   y += 4;
+
+  if (cv._rawText) {
+    renderRawText(doc, cv._rawText, M, y, TW, [50,50,50], [70,70,70]);
+    return;
+  }
 
   let ci = 0;
   function pill(label, fn) {
@@ -723,16 +799,25 @@ loadHistory();
 //  GET CV DATA (structured or parsed)
 // ══════════════════════════════════════════════
 function getCVData(resumeData) {
-  // 1. Gemini structured data use karo agar available hai
+  // 1. Gemini structured data — agar sab fields hain
   const s = resumeData.structured;
-  if (s && s.name && s.name.length > 1) {
-    // Make sure skills is array of strings
+  if (s && s.name && s.name.length > 1 &&
+      (s.summary || (s.experience && s.experience.length) || (s.skills && s.skills.length))) {
     if (s.skills && !Array.isArray(s.skills)) {
       s.skills = String(s.skills).split(/[,|•]+/).map(x => x.trim()).filter(Boolean);
     }
     return s;
   }
-  // 2. aiImprovedText parse karo
+
+  // 2. aiImprovedText ya originalText parse karo
   const text = resumeData.aiImprovedText || resumeData.originalText || '';
-  return parseResumeText(text);
+  const cv = parseResumeText(text);
+
+  // 3. Agar parse se kuch nahi mila — raw text ko directly use karo
+  // rawLines PDF mein line by line render hongi
+  if (!cv.summary && !cv.experience.length && !cv.skills.length) {
+    cv._rawText = text;
+  }
+
+  return cv;
 }
