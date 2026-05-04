@@ -396,12 +396,22 @@ function certsBlock(doc, certs, x, y, maxW, rgb) {
 // ── RAW TEXT RENDERER ─────────────────────────
 function renderRawText(doc, rawText, x, y, maxW, headRGB, bodyRGB) {
   const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|ABOUT|EXPERIENCE|WORK|EDUCATION|SKILLS|CERTIF|PROJECTS?|LANGUAGES?|AWARDS?|CONTACT|REFERENCES?)/i;
+  // Skip lines jo header mein already hain (name, email, phone)
+  const SKIP_RE    = /^(name\s*[:|-]|Ø|=|personal information)/i;
+
   const lines = rawText.split('\n');
+  let skippedHeader = false;
 
   lines.forEach(line => {
     if (y > PH - 18) { doc.addPage(); y = 18; }
     const trimmed = line.trim();
     if (!trimmed) { y += 2; return; }
+
+    // Skip garbled/header lines at top
+    if (!skippedHeader && (SKIP_RE.test(trimmed) || trimmed.match(/^[Ø=]/))) return;
+
+    // Mark header as done once we hit a real section
+    if (SECTION_RE.test(trimmed)) skippedHeader = true;
 
     if (SECTION_RE.test(trimmed) && trimmed.length < 60) {
       y += 4;
@@ -789,29 +799,47 @@ loadHistory();
 //  GET CV DATA (structured or parsed)
 // ══════════════════════════════════════════════
 function getCVData(resumeData) {
-  // aiImprovedText = actual content — always use this for PDF
   const text = (resumeData.aiImprovedText || resumeData.originalText || '').trim();
 
-  // Parse the text into structured sections
-  const cv = parseResumeText(text);
+  // Contact info extract karo
+  const emailMatch    = text.match(/[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}/);
+  const phoneMatch    = text.match(/(\+?\d[\d\s\-().]{7,14}\d)/);
+  const linkedinMatch = text.match(/linkedin\.com\/in\/[\w-]+/i);
+  const githubMatch   = text.match(/github\.com\/[\w-]+/i);
 
-  // Gemini structured se sirf contact info fill karo (agar parse se nahi mila)
-  const s = resumeData.structured;
-  if (s && s.contact) {
-    if (!cv.contact.email    && s.contact.email)    cv.contact.email    = s.contact.email;
-    if (!cv.contact.phone    && s.contact.phone)    cv.contact.phone    = s.contact.phone;
-    if (!cv.contact.location && s.contact.location) cv.contact.location = s.contact.location;
-    if (!cv.contact.linkedin && s.contact.linkedin) cv.contact.linkedin = s.contact.linkedin;
-    if (!cv.contact.github   && s.contact.github)   cv.contact.github   = s.contact.github;
+  // Name = first short line jo section heading nahi
+  const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|EXPERIENCE|WORK|EDUCATION|SKILLS|CERTIF|PROJECTS?|CONTACT|REFERENCES?|NAME|PERSONAL)/i;
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let name = '';
+  for (const line of lines) {
+    // Skip lines with special chars, emails, numbers, section headings
+    if (line.length > 0 && line.length < 50 &&
+        !line.match(/[@\d|•:=Ø]/) &&
+        !SECTION_RE.test(line)) {
+      name = line.replace(/^(name\s*[:|-]\s*)/i, '').trim();
+      if (name.length > 1) break;
+    }
   }
 
-  // Agar parse se kuch nahi mila — raw text directly render karo
-  if (!cv.name && !cv.summary && !cv.experience.length) {
-    cv._rawText = text;
-    // Name try karo first line se
-    const firstLine = text.split('\n').find(l => l.trim().length > 1 && l.trim().length < 60);
-    if (firstLine) cv.name = firstLine.trim();
-  }
+  // "Name: Ali Raza" pattern handle karo
+  const nameLabel = text.match(/^name\s*[:|-]\s*(.+)/im);
+  if (nameLabel) name = nameLabel[1].trim();
 
-  return cv;
+  return {
+    name:    name || '',
+    title:   '',
+    contact: {
+      email:    emailMatch    ? emailMatch[0]    : '',
+      phone:    phoneMatch    ? phoneMatch[0].trim() : '',
+      location: '',
+      linkedin: linkedinMatch ? linkedinMatch[0] : '',
+      github:   githubMatch   ? githubMatch[0]   : '',
+    },
+    summary:        '',
+    experience:     [],
+    education:      [],
+    skills:         [],
+    certifications: [],
+    _rawText: text   // ALWAYS render full text
+  };
 }
