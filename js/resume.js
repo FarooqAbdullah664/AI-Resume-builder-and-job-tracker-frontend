@@ -193,13 +193,17 @@ function parseResumeText(rawText) {
   if (linkedinMatch) cv.contact.linkedin = linkedinMatch[0];
   if (githubMatch)   cv.contact.github   = githubMatch[0];
 
-  // Name = first non-empty line (jo email/phone nahi)
-  for (const line of lines) {
-    if (!line.match(/[@|•\-]/)) { cv.name = line; break; }
-  }
-
-  // Section headings detect karo
+  // Name = first meaningful line (short, no special chars, not a section heading)
   const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|ABOUT|EXPERIENCE|WORK|EMPLOYMENT|EDUCATION|SKILLS|TECHNOLOGIES|CERTIFICATIONS?|AWARDS?|PROJECTS?|LANGUAGES?|CONTACT|REFERENCES?)/i;
+  for (const line of lines) {
+    const t = line.trim();
+    if (t.length > 1 && t.length < 50 &&
+        !t.match(/[@|•\-\d]/) &&
+        !SECTION_RE.test(t)) {
+      cv.name = t;
+      break;
+    }
+  }
 
   let currentSection = '';
   let currentExp = null;
@@ -390,22 +394,19 @@ function certsBlock(doc, certs, x, y, maxW, rgb) {
 }
 
 // ── RAW TEXT RENDERER ─────────────────────────
-// Jab structured parse fail ho — aiImprovedText ko
-// directly PDF mein render karo with smart formatting
 function renderRawText(doc, rawText, x, y, maxW, headRGB, bodyRGB) {
-  const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|EXPERIENCE|WORK|EDUCATION|SKILLS|CERTIF|PROJECTS?|LANGUAGES?|AWARDS?|CONTACT|REFERENCES?)/i;
+  const SECTION_RE = /^(SUMMARY|OBJECTIVE|PROFILE|ABOUT|EXPERIENCE|WORK|EDUCATION|SKILLS|CERTIF|PROJECTS?|LANGUAGES?|AWARDS?|CONTACT|REFERENCES?)/i;
   const lines = rawText.split('\n');
 
   lines.forEach(line => {
     if (y > PH - 18) { doc.addPage(); y = 18; }
     const trimmed = line.trim();
-    if (!trimmed) { y += 3; return; }
+    if (!trimmed) { y += 2; return; }
 
-    if (SECTION_RE.test(trimmed) && trimmed.length < 50) {
-      // Section heading
-      y += 3;
+    if (SECTION_RE.test(trimmed) && trimmed.length < 60) {
+      y += 4;
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
+      doc.setFontSize(10.5);
       doc.setTextColor(...headRGB);
       doc.text(trimmed.toUpperCase(), x, y);
       doc.setDrawColor(...headRGB);
@@ -413,23 +414,12 @@ function renderRawText(doc, rawText, x, y, maxW, headRGB, bodyRGB) {
       doc.line(x, y + 1.5, x + maxW, y + 1.5);
       y += 8;
     } else if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
-      // Bullet point
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9.5);
       doc.setTextColor(...bodyRGB);
-      const bullet = '\u2022  ' + trimmed.replace(/^[•\-*]\s*/, '');
-      y = txt(doc, bullet, x + 3, y, maxW - 3, 5);
+      y = txt(doc, '\u2022  ' + trimmed.replace(/^[•\-*]\s*/, ''), x + 3, y, maxW - 3, 5);
       y += 1;
-    } else if (trimmed.length < 60 && !trimmed.includes('@') && !trimmed.match(/^\d/) &&
-               trimmed === trimmed.toUpperCase() && trimmed.length > 3) {
-      // ALL CAPS short line = likely a name or heading
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor(...headRGB);
-      y = txt(doc, trimmed, x, y, maxW, 6);
-      y += 2;
     } else {
-      // Normal text
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9.5);
       doc.setTextColor(...bodyRGB);
@@ -799,24 +789,28 @@ loadHistory();
 //  GET CV DATA (structured or parsed)
 // ══════════════════════════════════════════════
 function getCVData(resumeData) {
-  // 1. Gemini structured data — agar sab fields hain
-  const s = resumeData.structured;
-  if (s && s.name && s.name.length > 1 &&
-      (s.summary || (s.experience && s.experience.length) || (s.skills && s.skills.length))) {
-    if (s.skills && !Array.isArray(s.skills)) {
-      s.skills = String(s.skills).split(/[,|•]+/).map(x => x.trim()).filter(Boolean);
-    }
-    return s;
-  }
+  // aiImprovedText = actual content — always use this for PDF
+  const text = (resumeData.aiImprovedText || resumeData.originalText || '').trim();
 
-  // 2. aiImprovedText ya originalText parse karo
-  const text = resumeData.aiImprovedText || resumeData.originalText || '';
+  // Parse the text into structured sections
   const cv = parseResumeText(text);
 
-  // 3. Agar parse se kuch nahi mila — raw text ko directly use karo
-  // rawLines PDF mein line by line render hongi
-  if (!cv.summary && !cv.experience.length && !cv.skills.length) {
+  // Gemini structured se sirf contact info fill karo (agar parse se nahi mila)
+  const s = resumeData.structured;
+  if (s && s.contact) {
+    if (!cv.contact.email    && s.contact.email)    cv.contact.email    = s.contact.email;
+    if (!cv.contact.phone    && s.contact.phone)    cv.contact.phone    = s.contact.phone;
+    if (!cv.contact.location && s.contact.location) cv.contact.location = s.contact.location;
+    if (!cv.contact.linkedin && s.contact.linkedin) cv.contact.linkedin = s.contact.linkedin;
+    if (!cv.contact.github   && s.contact.github)   cv.contact.github   = s.contact.github;
+  }
+
+  // Agar parse se kuch nahi mila — raw text directly render karo
+  if (!cv.name && !cv.summary && !cv.experience.length) {
     cv._rawText = text;
+    // Name try karo first line se
+    const firstLine = text.split('\n').find(l => l.trim().length > 1 && l.trim().length < 60);
+    if (firstLine) cv.name = firstLine.trim();
   }
 
   return cv;
